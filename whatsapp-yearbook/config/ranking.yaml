@@ -1,0 +1,37 @@
+# Ranking weights and limits
+
+message_scoring:
+  semantic_score_weight: 0.35
+  media_proximity_weight: 0.25
+  message_length_weight: 0.15
+  reply_depth_weight: 0.15
+  emotional_signal_weight: 0.10
+
+media_proximity_bonuses:
+  image_bonus: 0.30
+  voice_bonus: 0.25
+  video_bonus: 0.20
+  max_distance: 2
+
+cluster_scoring:
+  image_present_bonus: 0.20
+  voice_present_bonus: 0.15
+
+image_scoring:
+  narrative_relevance_weight: 0.50
+  aesthetic_score_weight: 0.20
+  event_proximity_weight: 0.20
+  cluster_weight: 0.10
+
+noise_filter:
+  min_word_count: 3
+  media_distance_exception: 2
+
+top_n_limits:
+  messages_per_day: 20
+  images_per_day: 4
+  voices_per_day: 2
+  events_per_day: 6
+  clusters_per_day: 5
+  messages_per_cluster: 5
+  candidate_quotes: 3

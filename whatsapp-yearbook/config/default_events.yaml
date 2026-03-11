@@ -1,0 +1,53 @@
+# Event detection configuration
+
+temporal_clustering:
+  cluster_gap_minutes: 45
+  min_cluster_size: 1
+
+event_types:
+  - conversation
+  - image_event
+  - voice_event
+  - plan_event
+  - emotion_event
+  - activity_event
+  - outing_meal
+  - outing_activity
+  - milestone
+
+planning_keywords:
+  - andiamo
+  - vediamoci
+  - stasera
+  - domani
+  - prenoto
+  - pranzo
+  - cena
+  - tonight
+  - tomorrow
+  - let's
+  - meet
+  - book
+  - reserve
+
+emotion_keywords:
+  - mi manchi
+  - ti amo
+  - non vedo l'ora
+  - bellissimo
+  - bellissima
+  - miss you
+  - love you
+  - can't wait
+  - amazing
+  - fantastico
+  - fantastica
+
+narrative_keywords:
+  - successo
+  - indovina
+  - ti racconto
+  - non ci crederai
+  - guess what
+  - you won't believe
+  - something happened

@@ -1,0 +1,47 @@
+[build-system]
+requires = ["setuptools>=45", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "whatsapp-yearbook"
+version = "0.1.0"
+description = "Transform a WhatsApp chat export into a daily PowerPoint yearbook"
+requires-python = ">=3.10"
+dependencies = [
+    "pydantic>=2.5",
+    "pandas>=2.1",
+    "pyarrow>=14.0",
+    "pillow>=10.0",
+    "python-pptx>=0.6.21",
+    "jsonschema>=4.20",
+    "rich>=13.0",
+    "typer>=0.9",
+    "pyyaml>=6.0",
+    "requests>=2.31",
+]
+
+[project.optional-dependencies]
+ai = [
+    "torch",
+    "transformers>=4.40",
+    "accelerate>=0.27",
+    "sentencepiece",
+    "qwen-vl-utils",
+    "openai-whisper",
+]
+dev = [
+    "pytest>=7.4",
+    "pytest-cov",
+    "ruff",
+    "mypy",
+]
+
+[project.scripts]
+yearbook = "yearbook.cli:app"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"

@@ -1,0 +1,33 @@
+# Default project configuration
+
+project_name: whatsapp_yearbook
+year_target: null  # null = tutta la conversazione, oppure es. 2025 per filtrare
+
+paths:
+  input_chat: "input/_chat.txt"
+  input_media: "input/media"
+  runs_dir: "runs"
+  cache_dir: "cache"
+  logs_dir: "logs"
+  output_dir: "output"
+  templates_dir: "templates"
+
+models:
+  image: "Qwen/Qwen2.5-VL-3B-Instruct"
+  audio: "large-v3"
+  reasoning: "gpt-oss:20b"
+
+ollama:
+  base_url: "http://localhost:11434"
+  timeout_seconds: 120
+  stream: false
+
+parsing:
+  encoding: "utf-8"
+  encoding_fallback: "latin-1"
+  # WhatsApp date format pattern
+  date_format: "%d/%m/%y, %H:%M"
+
+pipeline:
+  resume_on_error: true
+  force_rerun: false

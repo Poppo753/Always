@@ -1,0 +1,61 @@
+# Prompt templates for AI models
+
+image_caption_v1:
+  version: "image_caption_v1"
+  prompt: |
+    Analyze this image and return a JSON object with these exact fields:
+    {
+      "caption": "detailed description of the image",
+      "short_caption": "2-4 word summary",
+      "category": "one of: selfie, food_restaurant, travel_outdoor, screenshot, meme, document, room_interior, pet, people_group, object, other",
+      "subcategory": "more specific label or empty string",
+      "ocr_text": "any visible text in the image, or empty string",
+      "people_count_estimate": 0,
+      "contains_screenshot": false,
+      "contains_document_like_layout": false,
+      "contains_meme": false,
+      "tags": ["tag1", "tag2"],
+      "aesthetic_score": 0.7,
+      "narrative_relevance_score": 0.8,
+      "technical_quality_score": 0.7,
+      "confidence": 0.85,
+      "warnings": []
+    }
+    Return ONLY the JSON, no other text.
+
+day_reasoning_v1:
+  version: "day_reasoning_v1"
+  prompt: |
+    You are analyzing a day in a romantic/friendly conversation. Based on the structured context provided, extract key insights.
+
+    Return a JSON object with these exact fields:
+    {
+      "main_theme": "brief description of the day's main theme",
+      "day_type": "one of: quiet_day, social_evening, outing, emotional_moment, planning_day, milestone, mixed",
+      "importance_level": "one of: low, medium, high",
+      "mood": "one of: warm_playful, romantic, nostalgic, cheerful, neutral, tense, melancholy, excited",
+      "reasoning_summary": "2-3 sentences explaining what this day was about",
+      "evidence": {
+        "message_ids": [],
+        "event_ids": [],
+        "media_ids": []
+      },
+      "selected_quote_message_id": null,
+      "selected_image_media_ids": []
+    }
+    Return ONLY the JSON, no other text.
+
+narrative_generation_v1:
+  version: "narrative_generation_v1"
+  prompt: |
+    Based on the reasoning about this day, write the yearbook slide content.
+
+    Return a JSON object with these exact fields:
+    {
+      "title": "short evocative title for the day (max 8 words)",
+      "summary": "2-4 sentence narrative about the day, warm and personal",
+      "key_moments": ["moment 1", "moment 2", "moment 3"],
+      "quote": "a real memorable phrase from the conversation (or empty string)",
+      "mood": "same mood from reasoning"
+    }
+    Return ONLY the JSON, no other text.

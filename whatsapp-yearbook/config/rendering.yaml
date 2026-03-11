@@ -1,0 +1,43 @@
+# Rendering configuration
+
+slide:
+  width_emu: 9144000   # 10 inches
+  height_emu: 5143500  # 5.625 inches (16:9)
+
+  colors:
+    background: "1C1C2E"      # dark navy
+    title: "FFFFFF"           # white
+    body_text: "E0E0E0"       # light gray
+    accent: "C9A84C"          # warm gold
+    quote_text: "A8D8EA"      # soft blue
+    stats_text: "888888"      # muted
+
+  fonts:
+    title_size: 32
+    subtitle_size: 16
+    body_size: 13
+    quote_size: 14
+    stats_size: 10
+
+  layout:
+    title_top_pct: 0.04
+    title_left_pct: 0.04
+    title_width_pct: 0.92
+    title_height_pct: 0.12
+    body_top_pct: 0.18
+    body_left_pct: 0.04
+    body_width_pct: 0.54
+    body_height_pct: 0.60
+    image_top_pct: 0.16
+    image_left_pct: 0.60
+    image_width_pct: 0.36
+    image_height_pct: 0.55
+    stats_top_pct: 0.88
+    stats_left_pct: 0.04
+    stats_width_pct: 0.92
+    stats_height_pct: 0.10
+
+collage:
+  max_images: 4
+  hero_weight: 0.60
+  thumb_weight: 0.40
