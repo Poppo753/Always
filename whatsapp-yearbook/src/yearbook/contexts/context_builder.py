@@ -109,6 +109,7 @@ class DailyContextBuilder:
                 candidate_quotes.append(CandidateQuote(
                     message_id=sm.message_id,
                     text=sm.text,
+                    sender=sm.sender,
                     score=sm.score,
                 ))
         candidate_quotes = candidate_quotes[:3]
@@ -166,7 +167,8 @@ class DailyContextBuilder:
         if ctx.candidate_quotes:
             lines.append("CANDIDATE QUOTES:")
             for q in ctx.candidate_quotes:
-                lines.append(f'  "{q.text}" (id: {q.message_id})')
+                sender = q.sender or "unknown"
+                lines.append(f'  {sender}: "{q.text}" (id: {q.message_id})')
 
         return "\n".join(lines)
 

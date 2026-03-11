@@ -42,8 +42,31 @@ class GptOssClient:
             logger.error("Ollama API error: %s", e)
             raise
 
+    def _call_chat(self, system: str, user: str) -> Optional[str]:
+        """Use /api/chat with system + user messages for better instruction following."""
+        url = f"{self.base_url}/api/chat"
+        payload = {
+            "model": self.model_name,
+            "messages": [
+                {"role": "system", "content": system},
+                {"role": "user", "content": user},
+            ],
+            "stream": False,
+        }
+        try:
+            resp = requests.post(url, json=payload, timeout=self.timeout)
+            resp.raise_for_status()
+            data = resp.json()
+            return data.get("message", {}).get("content", "")
+        except requests.RequestException as e:
+            logger.error("Ollama chat API error: %s", e)
+            raise
+
     def _call_with_retry(self, prompt: str) -> Optional[str]:
         return retry(self._call, prompt, max_attempts=3, delay=5.0, exceptions=(Exception,))
+
+    def _call_chat_with_retry(self, system: str, user: str) -> Optional[str]:
+        return retry(self._call_chat, system, user, max_attempts=3, delay=5.0, exceptions=(Exception,))
 
     def reason_day(self, daily_context_text: str, prompt_template: str) -> Optional[dict[str, Any]]:
         """Send daily context to GPT-OSS for reasoning. Returns parsed JSON."""
@@ -54,9 +77,8 @@ class GptOssClient:
         return self._parse_json(response)
 
     def generate_summary(self, reasoning_text: str, prompt_template: str) -> Optional[dict[str, Any]]:
-        """Generate narrative summary from reasoning output. Returns parsed JSON."""
-        full_prompt = f"{prompt_template}\n\n---\n\n{reasoning_text}"
-        response = self._call_with_retry(full_prompt)
+        """Generate narrative summary using chat API for better instruction following."""
+        response = self._call_chat_with_retry(prompt_template, reasoning_text)
         if not response:
             return None
         return self._parse_json(response)

@@ -12,8 +12,9 @@ from yearbook.utils.hashing import sha256_str
 
 logger = logging.getLogger(__name__)
 
-_DEFAULT_REASONING_PROMPT = """You are analyzing a day in a romantic conversation between two people.
+_DEFAULT_REASONING_PROMPT = """You are analyzing a day in a WhatsApp conversation between Botta and Ana (a couple in a long-distance relationship).
 Based on the structured context below, identify the main theme, mood, and significance of the day.
+Always refer to her as "Ana" (never "Ana Pau Herrera").
 
 Return a JSON object with these exact fields:
 {
@@ -65,6 +66,12 @@ class DayReasoner:
             if raw:
                 self.cache.set_raw(ck, raw)
 
+        # Coerce evidence IDs to strings (GPT-OSS sometimes returns ints)
+        evidence = raw.get("evidence", {})
+        if isinstance(evidence, dict):
+            evidence = {k: [str(v) for v in vals] if isinstance(vals, list) else vals
+                        for k, vals in evidence.items()}
+
         return DailyReasoning(
             date=ctx.date,
             model_name=self.client.model_name,
@@ -74,9 +81,9 @@ class DayReasoner:
             importance_level=raw.get("importance_level", "medium"),
             mood=raw.get("mood", "neutral"),
             reasoning_summary=raw.get("reasoning_summary", ""),
-            evidence=raw.get("evidence", {}),
-            selected_quote_message_id=raw.get("selected_quote_message_id"),
-            selected_image_media_ids=raw.get("selected_image_media_ids", []),
+            evidence=evidence,
+            selected_quote_message_id=str(raw["selected_quote_message_id"]) if raw.get("selected_quote_message_id") is not None else None,
+            selected_image_media_ids=[str(x) for x in raw.get("selected_image_media_ids", [])],
         )
 
 
@@ -94,12 +101,17 @@ def run_reasoning(state: PipelineState) -> None:
     reasoner = DayReasoner(state)
     paths.daily_reasoning_dir.mkdir(parents=True, exist_ok=True)
     count = 0
+    failed = 0
 
     for ctx_path in context_files:
-        ctx = DailyContext.model_validate_json(ctx_path.read_text(encoding="utf-8"))
-        reasoning = reasoner.reason(ctx)
-        out_path = paths.daily_reasoning_path(ctx.date)
-        out_path.write_text(reasoning.model_dump_json(indent=2), encoding="utf-8")
-        count += 1
+        try:
+            ctx = DailyContext.model_validate_json(ctx_path.read_text(encoding="utf-8"))
+            reasoning = reasoner.reason(ctx)
+            out_path = paths.daily_reasoning_path(ctx.date)
+            out_path.write_text(reasoning.model_dump_json(indent=2), encoding="utf-8")
+            count += 1
+        except Exception as exc:
+            failed += 1
+            logger.error("Reasoning failed for %s: %s", ctx_path.stem, exc)
 
-    logger.info("Reasoning complete: %d days processed", count)
+    logger.info("Reasoning complete: %d ok, %d failed", count, failed)

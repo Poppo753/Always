@@ -56,4 +56,5 @@ class ScoredVoice(BaseModel):
 class CandidateQuote(BaseModel):
     message_id: str
     text: str
+    sender: str = ""
     score: float = 0.5

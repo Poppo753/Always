@@ -45,7 +45,13 @@ class CollageBuilder:
         return self._grid(valid)
 
     def _resize(self, img: Image.Image, w: int, h: int) -> Image.Image:
-        return img.resize((w, h), Image.LANCZOS)
+        """Fit image into w×h box preserving aspect ratio, pad with dark bg."""
+        img.thumbnail((w, h), Image.LANCZOS)
+        canvas = Image.new("RGB", (w, h), (28, 28, 46))
+        x = (w - img.width) // 2
+        y = (h - img.height) // 2
+        canvas.paste(img, (x, y))
+        return canvas
 
     def _grid(self, images: list[Image.Image]) -> Image.Image:
         """Lay out 2-4 images in a grid (2-col) with equal-sized cells."""

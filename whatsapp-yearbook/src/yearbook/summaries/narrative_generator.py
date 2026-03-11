@@ -12,21 +12,30 @@ from yearbook.utils.hashing import sha256_str
 
 logger = logging.getLogger(__name__)
 
-_DEFAULT_NARRATIVE_PROMPT = """Based on the day analysis below, write the yearbook slide content for this day.
-The tone should be warm, personal, and evocative — like a love story diary.
+_DEFAULT_NARRATIVE_PROMPT = """You are Botta. Write YOUR personal diary about your day with Ana.
+Rules:
+- FIRST PERSON ONLY. Use "I", "we", "my", "me", "our" in EVERY sentence.
+- NEVER third person. NEVER "Botta and Ana", "the pair", "the couple", "their".
+- NEVER use "Ana Pau Herrera" or "Ana Pau". Just "Ana".
+- Write like you're actually talking, casual and real. No flowery literary prose.
+- key_moments: give 2 to 5 bullet points. Vary the number! Not always the same amount.
+- quote: MUST start with "Ana: " or "Botta: " followed by the actual words from the chat. If no good quote exists, use empty string "".
 
-Return a JSON object with these exact fields:
-{
-  "title": "short evocative title for the day (max 8 words)",
-  "summary": "2-4 sentence narrative about the day, warm and personal",
-  "key_moments": ["moment 1", "moment 2", "moment 3"],
-  "quote": "a real memorable phrase from the conversation (or empty string if none available)",
-  "mood": "same mood from reasoning"
-}
-Return ONLY the JSON, no other text.
+GOOD summary:
+"Woke up to a voice note from Ana going on about her coworker drama — I was dying laughing. We spent the afternoon planning that lake trip, I'm so hyped. She told me she misses my cooking, and honestly that made my entire day. Also figured out we both hate the same Netflix show."
 
-DAY ANALYSIS:
-"""
+GOOD key_moments:
+["I laughed so hard at her coworker story", "We planned the lake trip for next weekend"]
+
+BAD (NEVER write like this):
+"The day unfolded as a tapestry of shared moments. Botta and Ana exchanged playful banter. Their love shone through affectionate gestures."
+
+GOOD quote: "Ana: te extraño mucho bebé 😂"
+GOOD quote: "Botta: sei pazza lo sai?"
+BAD quote (no speaker): "I love you"
+
+Return ONLY valid JSON:
+{"title": "max 5 words", "summary": "3-5 sentences, casual diary", "key_moments": ["2 to 5 items"], "quote": "Speaker: words", "mood": "from reasoning"}"""
 
 
 class NarrativeGenerator:
@@ -50,7 +59,7 @@ class NarrativeGenerator:
 
     def generate(self, reasoning: DailyReasoning) -> DailySummary:
         reasoning_text = reasoning.model_dump_json(indent=2)
-        ck = sha256_str(reasoning_text + self.prompt_version + self.client.model_name)
+        ck = sha256_str(reasoning_text + self.prompt + self.client.model_name)
 
         if self.cache.has(ck):
             logger.debug("Cache hit for summary: %s", reasoning.date)
@@ -66,17 +75,45 @@ class NarrativeGenerator:
         if not self._is_safe_quote(quote):
             quote = ""
 
+        summary_text = self._fix_text(raw.get("summary", reasoning.reasoning_summary))
+        title_text = self._fix_text(raw.get("title", f"Day {reasoning.date}"))
+        moments = [self._fix_text(m) for m in raw.get("key_moments", [])]
+
         return DailySummary(
             date=reasoning.date,
-            title=raw.get("title", f"Day {reasoning.date}"),
-            summary=raw.get("summary", reasoning.reasoning_summary),
-            key_moments=raw.get("key_moments", []),
+            title=title_text,
+            summary=summary_text,
+            key_moments=moments,
             quote=quote,
             mood=raw.get("mood", reasoning.mood),
             selected_image_media_ids=reasoning.selected_image_media_ids,
             stats={},
             source_evidence=reasoning.evidence,
         )
+
+    @staticmethod
+    def _fix_text(text: str) -> str:
+        """Post-process LLM output to enforce style rules."""
+        import re
+        # Fix full name → just Ana
+        text = text.replace("Ana Pau Herrera", "Ana")
+        text = text.replace("Ana Pau", "Ana")
+        # Fix third-person references
+        text = re.sub(r"\bBotta and Ana\b", "Ana and I", text)
+        text = re.sub(r"\bAna and Botta\b", "we", text)
+        text = re.sub(r"\bbetween Botta and Ana\b", "between us", text, flags=re.IGNORECASE)
+        text = re.sub(r"\bbetween Ana and Botta\b", "between us", text, flags=re.IGNORECASE)
+        # Fix common third-person patterns
+        text = re.sub(r"\bThe pair\b", "We", text)
+        text = re.sub(r"\bthe pair\b", "we", text)
+        text = re.sub(r"\bThe couple\b", "We", text)
+        text = re.sub(r"\bthe couple\b", "we", text)
+        text = re.sub(r"\bTheir love\b", "Our love", text)
+        text = re.sub(r"\btheir love\b", "our love", text)
+        text = re.sub(r"\btheir shared\b", "our shared", text, flags=re.IGNORECASE)
+        text = re.sub(r"\btheir conversations?\b", "our conversations", text, flags=re.IGNORECASE)
+        text = re.sub(r"\bBotta's\b", "my", text)
+        return text
 
     def _is_safe_quote(self, quote: str) -> bool:
         """Accept quotes that are non-empty and reasonably short."""

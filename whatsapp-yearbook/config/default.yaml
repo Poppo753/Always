@@ -15,7 +15,7 @@ paths:
 models:
   image: "Qwen/Qwen2.5-VL-3B-Instruct"
   audio: "large-v3"
-  reasoning: "gpt-oss:20b"
+  reasoning: "qwen3:8b"
 
 ollama:
   base_url: "http://localhost:11434"

@@ -31,6 +31,7 @@ class DailyContext(BaseModel):
     top_images: list[ScoredImage] = Field(default_factory=list)
     top_videos: list[dict] = Field(default_factory=list)
     top_voice_transcripts: list[ScoredVoice] = Field(default_factory=list)
+    candidate_quotes: list[CandidateQuote] = Field(default_factory=list)
 
 
 class DailyReasoning(BaseModel):
