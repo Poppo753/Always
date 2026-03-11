@@ -8,3 +8,14 @@ output/
 runs/
 cache/
 .DS_Store
+
+# Large input / generated folders
+input/
+Docs/chat/
+Docs/qwendownload/
+cache/images/
+cache/audio/
+cache/video/
+cache/video_frames/
+logs/
+.venv/
